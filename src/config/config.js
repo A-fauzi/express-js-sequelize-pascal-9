@@ -1,13 +1,5 @@
-/**
- * Todo: File config yang berada didalam folder config,
- * Todo: digunakan untuk menyediakan konfigurasi yang sudah di siapkan didalam file .env
- */
-
-// Todo -> 1. membutuhkan require module dotenv
-const dotenv = require('dotenv')
-dotenv.config()
-
-// Todo -> 2. kembalikan nilai konfigurasi yang sudah di setup didalam file .env
+const dotenv = require('dotenv');
+dotenv.config();
 module.exports = () => {
     return {
         host: process.env.APP_HOST,

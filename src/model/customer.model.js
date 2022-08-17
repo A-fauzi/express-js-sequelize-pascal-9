@@ -1,14 +1,10 @@
-// Todo -> Requirement file / module
-//  1. Config -> akan dibutuhkan oleh InfraManager
-const Config = require('../config/config')
+// Todo -> 1. customer model membutuhkan sequelize
 const {DataTypes} = require("sequelize");
 
-// Todo -> 2. {initDb} -> Hasil kembalian dari InfraManager yang nanti nya membutuhkan Config Methode
-const {initDb} = require('../manager/infra.manager')(Config())
-
-// Todo -> 3. create function untuk mengembalikan nilai define tabel
-module.exports = () => {
-    return initDb().define('mst_customer', {
+// Todo -> create function untuk membuat table di sequelize
+//  dan membutuhkan sebuah argument parameter db yang sudah di koneksikan oleh sequelize
+module.exports = (db) => {
+    return db.define('mst_customer', {
         // Todo: Define kolom
         id: {
             type: DataTypes.UUID,
