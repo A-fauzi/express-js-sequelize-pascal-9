@@ -1,130 +1,161 @@
-const {Sequelize, DataTypes} = require('sequelize')
-const sequelize = new Sequelize('postgresql://postgres:postgres@localhost:5432/db_enigmart') // Example for postgres
+const {Sequelize, DataType, DataTypes} = require('sequelize')
 
-// Start connection
-const conn = async () => {
-    try {
-        await sequelize.authenticate();
-        console.log('Connection has been established successfully.');
-    } catch (error) {
-        console.error('Unable to connect to the database:', error.message);
-    } finally {
-        await sequelize.close()
-    }
-}
-// conn().then(r => r)
+const connectionString = 'postgresql://postgres:postgres@localhost:5432/db_enigmart'
+const sequelize = new Sequelize(connectionString)
 
-//  define model table
-const migration = async () => {
-    //  define model table
-    const Customer = sequelize.define("customer", {
-        // alter column
+/**
+ * Todo: function to running server
+ * @returns {Promise<void>}
+ */
+const run = async () => {
+
+    /**
+     * Todo : define model
+     */
+    const Customer = sequelize.define('mst_customer', {
+        // Todo: Define kolom
         id: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true
         },
-        // Column
         name: {
-            // Attribute column
-            type: DataTypes.STRING(50), // if not define, default varchar(255)
-            allowNull: false
+            type: DataTypes.STRING(50), // default length 255
+            allowNull: true
         },
         address: DataTypes.STRING,
-        phone: DataTypes.STRING,
-        email: {
-            type: DataTypes.STRING,
+        phone: {
+            type: DataTypes.STRING(13),
             unique: true
         },
-        balance: DataTypes.INTEGER,
-        isStatus: {
+        email: {
+            type: DataTypes.STRING(100),
+            unique: true
+        },
+        balance: {
+            type: DataTypes.INTEGER,
+            types: DataTypes.INTEGER,
+            defaultValue: 0,
+            allowNull: false
+        },
+        is_status: {
             type: DataTypes.BOOLEAN,
             defaultValue: true
         }
+
     }, {
-        freezeTableName: true, // cari penjelasan
-        underscored: true, // cari penjelasan
-        paranoid: true
+        freezeTableName: true, // untuk membuat kolom cutom pada table
+        underscored: true, // mendukung colom dengan karakter underscore
+        paranoid: true // jika data di hapus, data tersebut masih berada didalam table, namun data tersebut sudah terhapus dan masuk kedalam history kolom deleted
     })
-    await Customer.sync({alter: true}) // alter true berguna saat ingin merubah struktur column dengan otomatis
 
-    // CRUD Basic
+    await Customer.sync({alter: true}) // mendukung perubahan structure table tanpda merubah data yang sudah ada
 
-    // insert
-    // const customer1 = await Customer.create({
-    //     name: 'Azis G',
-    //     address: 'Bekasi',
-    //     phone: '94579475945',
-    //     email: "zis@gmail.com",
-    //     balance: 25
-    // })
-    // console.log('customer1', customer1)
+    // CRUD BASIC
+    // create
+    // const customer = await Customer.bulkCreate([
+    //     {
+    //         name: 'customer 6',
+    //         address: 'address 6',
+    //         phone: '082112966366',
+    //         email: 'cs6@gmail.com',
+    //         balance: 6000,
+    //         is_status: false
+    //     },
+    //     {
+    //         name: 'customer 7',
+    //         address: 'address 7',
+    //         phone: '082112966367',
+    //         email: 'cs7@gmail.com',
+    //         balance: 7000,
+    //         is_status: true
+    //     },
+    //     {
+    //         name: 'customer 8',
+    //         address: 'address 8',
+    //         phone: '082112966368',
+    //         email: 'cs8@gmail.com',
+    //         balance: 8000,
+    //         is_status: false
+    //     },
+    //     {
+    //         name: 'customer 9',
+    //         address: 'address 9',
+    //         phone: '082112966369',
+    //         email: 'cs9@gmail.com',
+    //         balance: 9000,
+    //         is_status: true
+    //     },
+    //     {
+    //         name: 'customer 10',
+    //         address: 'address 10',
+    //         phone: '082112966310',
+    //         email: 'cs10@gmail.com',
+    //         balance: 10000,
+    //         is_status: false
+    //     },
+    // ])
+    // console.log('add customer', customer)
 
-    // Read
-    // Select * From ...
-    const cus1 = await Customer.findAll()
-    console.log(JSON.stringify(cus1, null, 3))
+    // SELECT * FROM ..
+    // read
+    const findAllCustomer = await Customer.findAll()
+    console.log(`SELECT * FROM ...`)
+    console.log('FIND ALL CUSTOMER...')
+    console.log(`All Customer`, JSON.stringify(findAllCustomer, null, 4))
 
-    console.log(`SELECT *
-                 FROM..WHERE name`)
-    const cus2 = await Customer.findAll({
-        name: 'Sule'
+    // search all data berdasarkan query name
+    console.log('Hasil Pencarian Berdasarkan Name...')
+    const findAllCByName = await Customer.findAll({
+        where: { name: 'customer ' }
     })
-    console.log(JSON.stringify(cus2, null, 3))
+    const checkDataCustomerByName =  String(findAllCByName) === '' ? 'Data Tidak Ditemukan' :  JSON.stringify(findAllCByName, null, 4)
+    console.log(checkDataCustomerByName)
 
-    const cus3 = await Customer.findAll({
-        oder: [['createdAt', 'desc']]
+    // Mengurutkan data berdasarkan tanggal asc / desc
+    console.log('Sort data berdasarkan tanggal terbaru...')
+    const findAllCusOrderBy = await Customer.findAll({
+        order: [ ['createdAt', 'desc'] ]
     })
-    console.log(`SELECT *
-                 FROM..ORDER DESC`)
-    console.log(JSON.stringify(cus3, null, 3))
+    console.log(JSON.stringify(findAllCusOrderBy, null, 4))
 
-    // findone || findByPk()
-    const cus4 = await Customer.findOne({
-        where: {name: 'Sule'},
-    })
-    console.log(`[single row findOne] SELECT * FROM ..`)
-    console.log(cus4)
+    // todo: findOne() || findByPk()
+    console.log(`Search data by name...`)
+    const customer04 = await Customer.findOne({
+        where: { name: 'customer 2' },
+    });
+    const checkDataCustomerByOne =  customer04 === null ? 'Data Tidak Ditemukan' :  JSON.stringify(customer04, null, 4)
+    console.log(checkDataCustomerByOne)
 
-    // findByPk() -> spesifik hanya untuk si primary key
-    const cus5 = await Customer.findByPk('c77a3fb0-0191-4c0c-a9b8-1c42747b3557')
-    console.log(`[single row findByPk] SELECT * FROM ..`)
-    console.log(cus5)
-
-    // findAndCountAll() -> digunakan untuk pagination (page, totalItem) limit, offset
-    // Data 3
+    // Todo: findByPk() -> spesifik hanya untuk si primary key
+    console.log(`Search data by id...`)
+    const customer05 = await Customer.findByPk('3078e00d-0945-4e20-bdc1-58d55117a0d4');
+    const checkDataCustomerByPK =  customer05 === null ? 'Data Tidak Ditemukan' :  JSON.stringify(customer05, null, 4)
+    console.log(checkDataCustomerByPK)
 
 
-    // DELETE
-    console.log(`DELETE FROM ...`)
-    const cus6 = await Customer.destroy({
-        where: {id: '7110deb7-6d04-450d-b98f-6865c13aa348'}
-    })
-    // Mengembalikan rowcount, 1 = ada datanya, 0 = tidak ada datanya
-    console.log('delete customer 1', cus6)
-
-    const cus7 = await Customer.findAll({
-        // paranoid: false // menampilkan data yang telah di destroy
-    })
-    console.log('After deleted')
-    console.log(JSON.stringify(cus7, null, 3))
-
-
-    // UPDATE
-    console.log(`UPDATE...`)
-    const updateCus = await Customer.update(
+    // update
+    // Jika result yang di kembalikan 1, data berhasil di update
+    console.log('UPDATE DATA...')
+    const updateCsById = await Customer.update(
         {
-            balance: "1000000"
+            name: 'Akhmad Fauzi'
         },
         {
-            where: {
-                id: "481bb6fa-72b1-4934-9b47-bde344485d13"
-            }
+            where: { id: '0b53d140-4aa0-49b4-9e7b-2c7cb6334cf9'}
         }
     )
-    console.log(`Update cus: `, updateCus)
+    const checkDataUpdate =  Number(updateCsById) === 0 ? 'Data Tidak Ditemukan' :  'Data Berhasil Di Update'
+    console.log(checkDataUpdate)
+
+    // delete
+    // Jika result yang di kembalikan 1, data berhasil di delete
+    console.log('DELETE DATA...')
+    const deleteData = await Customer.destroy({
+        where: {id: '0b53d140-4aa0-49b4-9e7b-2c7cb6334cf9'}
+    })
+    const checkDataDelete = deleteData === 0 ? 'Data Tidak Ditemukan' :  'Data Berhasil Dihapus'
+    console.log(checkDataDelete)
+
 }
-migration().then(r => r)
-
-// Simple insert field
-
+run().then(r => r)
