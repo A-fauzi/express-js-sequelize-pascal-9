@@ -157,5 +157,23 @@ const run = async () => {
     const checkDataDelete = deleteData === 0 ? 'Data Tidak Ditemukan' :  'Data Berhasil Dihapus'
     console.log(checkDataDelete)
 
+
+    // findAndCountAll() -> digunakan untuk pagination (page, totalItem) limit, offset
+    // Data 3 [1, 2, 3] (limit 1, offset 8) -> 2
+    /**
+     * 1 -> page 1
+     * 2
+     * 3
+     * 4
+     * 5 -> page 1
+     * 6 -> page 2
+     * 7
+     * 8
+     * 9
+     * 10 -> page 2
+     * 11 -> page 3
+     */
+    // Rumus Pagination: offset =
+
 }
 run().then(r => r)
